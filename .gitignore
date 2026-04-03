@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.idea/
+app_data/
+*.jsonl
+*.log
+
+# Local secrets
+app/.env
+.env

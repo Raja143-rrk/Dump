@@ -6,6 +6,14 @@
   const USER_KEY = 'dbm_user';
   const ROLE_KEY = 'dbm_role';
 
+  // ✅ NEW: Allowed company domains
+  const ALLOWED_DOMAINS = ['thinkartha.com'];
+
+  // ✅ NEW: Optional domain → role mapping
+  const DOMAIN_ROLE_MAP = {
+    'thinkartha.com': 'operator' // change to 'admin' if needed
+  };
+
   const ROLE_DEFINITIONS = {
     admin: {
       key: 'admin',
@@ -58,10 +66,17 @@
   };
 
   const DEFAULT_USERS = {
-    admin: { password: 'Migrator@123', role: 'admin', home: 'home.html' },
-    operator: { password: 'Welcome@123', role: 'operator', home: 'home.html' },
-    viewer: { password: 'Viewer@123', role: 'viewer', home: 'home.html' }
+    'admin@thinkartha.com': { password: 'Migrator@123', role: 'admin', home: 'home.html' },
+    'operator@thinkartha.com': { password: 'Welcome@123', role: 'operator', home: 'home.html' },
+    'viewer@thinkartha.com': { password: 'Viewer@123', role: 'viewer', home: 'home.html' }
   };
+
+  // ✅ NEW: Check if email domain is allowed
+  function isAllowedDomain(username) {
+    if (!username.includes('@')) return false;
+    const domain = username.split('@')[1].toLowerCase();
+    return ALLOWED_DOMAINS.includes(domain);
+  }
 
   function normalizeRole(roleValue) {
     return LEGACY_ROLE_MAP[String(roleValue || '').trim()] || 'viewer';
@@ -92,9 +107,6 @@
       const normalized = Object.fromEntries(
         Object.entries(parsed || {}).map(([username, meta]) => [username, normalizeUserRecord(meta)])
       );
-      if (!normalized.admin) normalized.admin = { ...DEFAULT_USERS.admin };
-      if (!normalized.operator) normalized.operator = { ...DEFAULT_USERS.operator };
-      if (!normalized.viewer) normalized.viewer = { ...DEFAULT_USERS.viewer };
       localStorage.setItem(USERS_KEY, JSON.stringify(normalized));
       return normalized;
     } catch (_) {
@@ -125,17 +137,33 @@
     };
   }
 
+  // ✅ UPDATED LOGIN FUNCTION
   function login(username, password) {
+    // 🔐 Block non-company emails
+    if (!isAllowedDomain(username)) {
+      return { error: 'Only @thinkartha.com emails are allowed' };
+    }
+
     const users = getUsers();
     const user = users[username];
-    if (!user || user.password !== password) return null;
+
+    if (!user || user.password !== password) {
+      return null;
+    }
+
+    // ✅ Assign role based on domain (optional override)
+    const domain = username.split('@')[1].toLowerCase();
+    const roleFromDomain = DOMAIN_ROLE_MAP[domain];
+    const finalRole = roleFromDomain || user.role;
+
     sessionStorage.setItem(AUTH_KEY, 'true');
     sessionStorage.setItem(USER_KEY, username);
-    sessionStorage.setItem(ROLE_KEY, normalizeRole(user.role));
+    sessionStorage.setItem(ROLE_KEY, normalizeRole(finalRole));
+
     return {
       username,
-      role: normalizeRole(user.role),
-      roleLabel: roleLabel(user.role),
+      role: normalizeRole(finalRole),
+      roleLabel: roleLabel(finalRole),
       home: user.home || 'home.html'
     };
   }

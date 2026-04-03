@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | Database Migrator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root { --bg:#f5f7fb; --surface:#ffffff; --surface2:#f8fafc; --border:#d9e2ec; --blue:#1f73c9; --text:#152238; --muted:#4c5d73; --dim:#73839a; --err:#d14343; --display:'Sora', sans-serif; --body:'Manrope', sans-serif; --mono:Consolas, 'Courier New', monospace; --shadow:0 14px 36px rgba(15,23,42,.08); }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; display:grid; place-items:center; position:relative; overflow:hidden; font-family:var(--body); color:var(--text); background:linear-gradient(180deg, #fbfcfe, var(--bg)); padding:24px; }
+body::before,body::after { content:""; position:fixed; inset:0; pointer-events:none; }
+body::before { opacity:1; background:linear-gradient(rgba(15,23,42,.03) 1px, transparent 1px),linear-gradient(90deg, rgba(15,23,42,.03) 1px, transparent 1px); background-size:56px 56px; mask-image:linear-gradient(to bottom, rgba(0,0,0,.3), transparent 78%); }
+body::after { opacity:1; background:radial-gradient(circle at 18% 20%, rgba(31,115,201,.08), transparent 0 22%),radial-gradient(circle at 82% 78%, rgba(31,115,201,.05), transparent 0 18%); }
+.shell { width:min(960px, 100%); display:grid; grid-template-columns:1.05fr .95fr; position:relative; z-index:1; border:1px solid var(--border); border-radius:20px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow); }
+.panel { padding:34px; }
+.intro { background:linear-gradient(180deg, #fbfdff, #f5f8fc); border-right:1px solid var(--border); }
+.eyebrow { color:var(--blue); text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; margin-bottom:12px; font-family:var(--mono); }
+.intro h1 { margin:0 0 12px; font-family:var(--display); font-size:clamp(2rem, 4vw, 3.4rem); line-height:.95; letter-spacing:-.04em; }
+.intro h1 span { color:var(--blue); font-style:italic; }
+.intro p { margin:0 0 22px; color:var(--muted); line-height:1.6; }
+.feature { padding:14px 0; border-top:1px solid var(--border); color:var(--muted); }
+.feature strong { display:block; margin-bottom:6px; color:var(--text); }
+.brand { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+.brand-icon { width:40px; height:40px; display:grid; place-items:center; border-radius:12px; border:1px solid #ffd4c9; background:#fff7f4; color:#ef5b3f; }
+.brand-name { font-family:var(--display); font-size:1.1rem; font-weight:800; }
+.brand-name span { color:var(--blue); }
+.card-title { margin:8px 0 8px; font-family:var(--display); font-size:1.5rem; }
+.card-sub { margin:0 0 18px; color:var(--dim); }
+.form-group { margin-bottom:14px; }
+label { display:block; margin-bottom:8px; color:var(--muted); font-size:.84rem; }
+.input { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font:inherit; outline:none; }
+.input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(31,115,201,.12); }
+.btn { width:100%; border:0; border-radius:10px; padding:13px 16px; cursor:pointer; font:inherit; font-weight:700; background:var(--blue); color:#fff; }
+.btn:disabled { opacity:.6; cursor:not-allowed; }
+.hint { margin-top:16px; color:var(--dim); font-size:.78rem; line-height:1.5; }
+.err { display:none; margin-top:10px; color:var(--err); font-size:.78rem; }
+.demo { margin-top:18px; padding:14px; border:1px solid var(--border); border-radius:14px; background:#fbfdff; }
+.demo strong { display:block; margin-bottom:8px; }
+.input,.eyebrow,.hint,.err,.demo code { font-family:var(--mono); }
+.demo code { display:block; margin-bottom:4px; color:var(--text); }
+.theme-bar { position:fixed; top:18px; right:18px; z-index:10; }
+.theme-select { min-width:110px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:var(--text); font:600 .92rem var(--body); }
+:root[data-theme="dark"] body { background:linear-gradient(180deg, #09111f, #0b1220); color:#e5e7eb; }
+:root[data-theme="dark"] body::before { background:linear-gradient(rgba(148,163,184,.05) 1px, transparent 1px),linear-gradient(90deg, rgba(148,163,184,.045) 1px, transparent 1px); }
+:root[data-theme="dark"] body::after { background:radial-gradient(circle at 18% 20%, rgba(96,165,250,.16), transparent 0 22%),radial-gradient(circle at 82% 78%, rgba(245,158,11,.08), transparent 0 18%); }
+:root[data-theme="dark"] .shell,
+:root[data-theme="dark"] .intro,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .demo { background:#111a2b; border-color:rgba(148,163,184,.16); color:#e5e7eb; }
+:root[data-theme="dark"] .input,
+:root[data-theme="dark"] .theme-select { background:#162338; border-color:rgba(148,163,184,.16); color:#e5e7eb; }
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] option { background:#162338; color:#e5e7eb; }
+:root[data-theme="dark"] .card-sub,
+:root[data-theme="dark"] .hint,
+:root[data-theme="dark"] .intro p,
+:root[data-theme="dark"] .feature,
+:root[data-theme="dark"] label { color:#94a3b8; }
+:root[data-theme="dark"] .brand-icon { background:#1c2436; border-color:#3b4b68; color:#60a5fa; }
+@media (max-width:900px) { .shell { grid-template-columns:1fr; } .intro { border-right:0; border-bottom:1px solid var(--border); } }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel intro">
+      <div class="eyebrow">Secure Entry</div>
+      <h1>Database <span>Migrator</span></h1>
+      <p>Sign in to access production-supported migration workflows and advanced connector modules from a single controlled entry point.</p>
+      <div class="feature">
+        <strong>Production Migration</strong>
+        Supported engines only: MySQL, PostgreSQL, SQL Server, and Snowflake.
+      </div>
+      <div class="feature">
+        <strong>Advanced Connectors</strong>
+        Separate area for partial, planned, or experimental database connectors.
+      </div>
+      <div class="feature">
+        <strong>Cleaner User Flow</strong>
+        Users choose the right module after login instead of seeing unsupported options too early.
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="brand">
+        <div class="brand-icon"><i class="fa-solid fa-database"></i></div>
+        <div class="brand-name">Database <span>Migrator</span></div>
+      </div>
+      <h2 class="card-title">Login</h2>
+      <p class="card-sub">Enter valid credentials to continue to the home page.</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input class="input" id="username" autocomplete="username" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input class="input" id="password" type="password" autocomplete="current-password" placeholder="Enter password">
+        </div>
+        <button class="btn" id="loginBtn" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+        <div class="err" id="loginErr">Invalid username or password.</div>
+      </form>
+
+      <div class="demo">
+        <strong>Current Access</strong>
+        <code>admin</code>
+        <code>operator</code>
+        <code>viewer</code>
+      </div>
+
+      <div class="hint">
+        This is a client-side access gate for the current HTML workflow.
+      </div>
+    </section>
+  </div>
+
+<script src="rbac.js"></script>
+<script>
+'use strict';
+const THEME_KEY = 'dbm_theme';
+
+function resolveTheme(pref) {
+  if (pref === 'light' || pref === 'dark') return pref;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function changeTheme(pref) {
+  localStorage.setItem(THEME_KEY, pref);
+  document.documentElement.dataset.theme = resolveTheme(pref);
+}
+
+function initTheme() {
+  const pref = localStorage.getItem(THEME_KEY) || 'auto';
+  const select = document.getElementById('themeSelect');
+  if (select) select.value = pref;
+  document.documentElement.dataset.theme = resolveTheme(pref);
+}
+
+DBM_RBAC.getUsers();
+
+if (DBM_RBAC.getSession().isAuthenticated) {
+  window.location.replace('home.html');
+}
+initTheme();
+
+document.getElementById('loginForm').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('loginErr');
+  const user = DBM_RBAC.login(username, password);
+
+  if (!user) {
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  sessionStorage.setItem('dbm_role', user.role);
+  window.location.replace(user.home);
+});
+</script>
+</body>
+</html>
